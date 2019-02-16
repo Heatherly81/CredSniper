@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, abort, Response
 from jinja2 import Environment, PackageLoader, select_autoescape
-from core import config, functions, output
+from core import config, functions
 import os, importlib, argparse, time
 
 class CredSniper():
@@ -107,8 +107,7 @@ class CredSniper():
         if not os.path.exists('.sniped'):
             os.mknod('.sniped')
 
-
-    # TODO move this to output.py (needs some way to access config)
+        
     def verbose_print(self, message):
         if self.verbose:
             dt = time.strftime('%Y-%m-%d %H:%M')
@@ -122,7 +121,7 @@ def custom_401(error):
     return jsonify({'message': error.description['message']}), 401
 
 if __name__ == "__main__":
-    output.print_banner()
+    functions.print_banner()
     cs.verbose_print('Module: {}'.format(cs.module_name))
     cs.verbose_print('Port: {}'.format(cs.port))
     cs.verbose_print('Use SSL: {}'.format(cs.enable_ssl))
@@ -140,15 +139,8 @@ if __name__ == "__main__":
     else:
         context = None
 
-    try:
-        app.run(
-            host='0.0.0.0',
-            port=cs.port,
-            ssl_context=context
-        )
-    except FileNotFoundError as e:
-        if cs.enable_ssl:
-            msg = "SSL certificates not found. Please ensure '{}' and '{}' exist.".format(context[0], context[1])
-            output.exception(msg)
-        else:
-            output.exception(e)
+    app.run(
+        host='0.0.0.0',
+        port=cs.port,
+        ssl_context=context
+    )
